@@ -6,11 +6,15 @@
 !function($){
 	"use strict";
 	
-	var VirtualKeyBoard = function(){
-		this.initialize();
+	var VirtualKeyBoard = function(sinze){
+		this.initialize(sinze);
 	};
 	
 	VirtualKeyBoard.prototype = {
+		options:{
+			sinzePass:5,
+			separator:'-'
+		},
 		keys:[],
 		captureKey:[],
 		constructor:VirtualKeyBoard,
@@ -67,18 +71,20 @@
 	};
 	
 	VirtualKeyBoard.prototype.Tpl = {
-		generate:function(obj){
+		generate:function(obj, callBack){
 			var keyBoard = obj.getKeyBoard(),
 				tpl = new Array();
-					tpl.push('<div class="btn-group">');
-					for(var key in keyBoard){
-						tpl.push('<button type="button" class="btn btn-default" id="key-'+key+'">'+keyBoard[key]+'</button>');
-					}	
-					tpl.push('</div>');
-			return tpl.join('').trim();
+				for(var key in keyBoard){
+					tpl.push('<button type="button" class="btn btn-primary" id="key-'+key+'">'+keyBoard[key]+'</button>');
+				}	
+					
+				if(typeof callBack == 'function'){
+					callBack.call({tpl:tpl.join('').trim(), v:obj});
+					return ;
+				}
 		}
 	}
-	
+		
 	$.fn['virtualKeyBoard']=function(options){
 		/**
 		 * Cria tag password::
@@ -93,7 +99,20 @@
 							type:'password',
 							name:name,
 							id:id
-						}).appendTo('body');
+						}).appendTo('body'),
+					
+					/**
+					 * Cria modal para receber html::
+					 */
+						tpl = new Array();
+						tpl.push('<div id="virtual-key-board" style="display:none;">');
+							tpl.push('<div class="btn-group" id="keys"></div>');
+							//tpl.push('<div>');
+								//tpl.push('<button type="button" class="btn btn-success">Send</button>');
+								//tpl.push('<button type="button" class="btn btn-warning">Cancel</button>');
+							//tpl.push('</div>');
+						tpl.push('</div>');
+						$(tpl.join('').trim()).appendTo('body');
 					$(this).remove();
 				return password;
 			}).call(this),
@@ -101,13 +120,19 @@
 			/**
 			 * Instancia class::
 			 */
-				v = new VirtualKeyBoard();
+				v = new VirtualKeyBoard(5);
 				
-			$(self).on('click', function(){
-				console.log( v.Tpl.generate(v) );
+			$(inputPassword).on('click', function(){
+				$(this).off('click');
 				
-				//var keyBoard = v.getKeyBoard();
+				v.Tpl.generate(v, function(){
+					$('#keys').html(this.tpl);
+					$('#virtual-key-board').show();
 					
+					$('[id^=key-]').on('click', function(){
+						v.setKey( $(this).text() );
+					})
+				});
 			});
 	};
 }(window.jQuery);
