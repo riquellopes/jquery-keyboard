@@ -66,6 +66,19 @@
 		}
 	};
 	
+	VirtualKeyBoard.prototype.Tpl = {
+		generate:function(obj){
+			var keyBoard = obj.getKeyBoard(),
+				tpl = new Array();
+					tpl.push('<div class="btn-group">');
+					for(var key in keyBoard){
+						tpl.push('<button type="button" class="btn btn-default" id="key-'+key+'">'+keyBoard[key]+'</button>');
+					}	
+					tpl.push('</div>');
+			return tpl.join('').trim();
+		}
+	}
+	
 	$.fn['virtualKeyBoard']=function(options){
 		/**
 		 * Cria tag password::
@@ -85,17 +98,15 @@
 				return password;
 			}).call(this),
 			
-			/*options=$.extend({
-				click:null,
-				submit:null,
-				cancel:null
-			}, options);*/
-			
-			v = new VirtualKeyBoard();
+			/**
+			 * Instancia class::
+			 */
+				v = new VirtualKeyBoard();
 				
 			$(self).on('click', function(){
-				var keyBoard = v.getKeyBoard();
+				console.log( v.Tpl.generate(v) );
 				
+				//var keyBoard = v.getKeyBoard();
 					
 			});
 	};
