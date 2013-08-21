@@ -1,0 +1,11 @@
+{
+	"name":"jquery-keyboard",
+	"description":"Simpli Jquery plugin that virtual keyboard.",
+	"homepage":"http://henriquelopes.com.br",
+	"author":"Henrique Lopes",
+	"lincense":"MIT",
+	"repository":{
+		"type":"git",
+		"url":"git://github.com/riquellopes/jquery-keyboard.git"
+	}
+}
