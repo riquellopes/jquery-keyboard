@@ -9,7 +9,13 @@
 <body>
 	<script>
 		$(function(){
-			$("#key-board").virtualKeyBoard();
+			$("#key-board").virtualKeyBoard({
+				size:6,
+				separador:'-',
+				end:function(){
+					console.log(this);
+				}
+			});
 		});
 	</script>
 </body>

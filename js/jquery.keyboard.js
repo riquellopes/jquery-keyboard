@@ -6,67 +6,63 @@
 !function($){
 	"use strict";
 	
-	var VirtualKeyBoard = function(sinze){
-		this.initialize(sinze);
+	var VirtualKeyBoard = function(size, separador){
+		this.initialize(size, separador);
 	};
 	
 	VirtualKeyBoard.prototype = {
-		options:{
-			sinzePass:5,
-			separator:'-'
-		},
+		size:null,
+		separador:null,
+		ready:true,
 		keys:[],
 		captureKey:[],
 		constructor:VirtualKeyBoard,
-		/**
-		 * Inicializa sistema::
-		 */
-		initialize:function(){
-			console.log(this);
+		initialize:function(size, separador){
+			this.size=size;
+			this.separador=separador;
 		},
-		/**
-		 * Gera um array com número aleatórios::
-		 */
+		start:function(){
+			this.ready=true;
+			this.captureKey=[];
+		},
 		randomKeys:function(){
+			if( !this.ready )
+				throw "Password full size.";
 			this.keys=[0,1,2,3,4,5,6,7,8,9]; 
 			this.keys.sort(function(){
 				return 0.5 - Math.random();
 			});	
 		},
-		/**
-		 * Gera teclado com números aleatorios::
-		 */
 		getKeyBoard:function(){
 			this.randomKeys();
 			var keysbord=[],
 				isInterable=this.keys.length > 0;
 				
-				/**
-				 * Gera teclas::
-				 */
 				while(isInterable){
-					keysbord.push( this.keys[0].toString().concat("-").concat(this.keys[1]) );
+					keysbord.push( this.keys[0].toString().concat(this.separador).concat(this.keys[1]) );
 					this.keys.shift();
 					this.keys.shift();
-
+					
 					isInterable=this.keys.length > 0;
 				}//while
 			return keysbord;
 		},
-		/**
-		 * Define valor do key::
-		 */
 		setKey:function(value){
-			this.captureKey.push( value.split('-') );
+			if( this.captureKey.length == this.size ){
+				this.ready=false;
+				throw "Password full size.";
+			}
+			this.captureKey.push( value.split(this.separador) );
 			return this;
 		},
-		/**
-		 * Recupera valor do key::
-		 */
-		getKey:function(index){
-			try{
-				this.captureKey[index];
-			}catch(error){/**/}
+		getKey:function(){
+			this.captureKey.join('').trim();
+		},
+		getFakeKey:function(fkey){
+			return (new Array(this.captureKey.length+1)).join(fkey);
+		},
+		getPass:function(){
+			return this.captureKey.join('@@');
 		}
 	};
 	
@@ -86,14 +82,16 @@
 	}
 		
 	$.fn['virtualKeyBoard']=function(options){
-		/**
-		 * Cria tag password::
-		 */
-		var inputPassword=(function(){
+		var options=$.extend({
+				size:8,
+				separador:'-',
+				fakePass:"*"
+			}, options),
+			inputPassword=(function(){
 				var id = $(this).prop('id'),
 					name = "virtual-keyboard-name-".concat(id.toLowerCase()),
 					/**
-					 * Define campo de senha::
+					 * Define input password::
 					 */
 						password = $('<input />', {
 							type:'password',
@@ -102,15 +100,11 @@
 						}).appendTo('body'),
 					
 					/**
-					 * Cria modal para receber html::
+					 * Create modal to receive html::
 					 */
 						tpl = new Array();
 						tpl.push('<div id="virtual-key-board" style="display:none;">');
 							tpl.push('<div class="btn-group" id="keys"></div>');
-							//tpl.push('<div>');
-								//tpl.push('<button type="button" class="btn btn-success">Send</button>');
-								//tpl.push('<button type="button" class="btn btn-warning">Cancel</button>');
-							//tpl.push('</div>');
 						tpl.push('</div>');
 						$(tpl.join('').trim()).appendTo('body');
 					$(this).remove();
@@ -118,21 +112,33 @@
 			}).call(this),
 			
 			/**
-			 * Instancia class::
+			 * Object instance::
 			 */
-				v = new VirtualKeyBoard(5);
+				v = new VirtualKeyBoard(options.size, options.separador);
 				
 			$(inputPassword).on('click', function(){
-				$(this).off('click');
-				
+				$(this).val('');
+				v.start();
 				v.Tpl.generate(v, function(){
 					$('#keys').html(this.tpl);
 					$('#virtual-key-board').show();
-					
-					$('[id^=key-]').on('click', function(){
-						v.setKey( $(this).text() );
-					})
 				});
+			});
+			
+			$('body').on('click', '#keys [id^=key-]', function(){
+				try{
+					v.setKey( $(this).text() );
+					v.Tpl.generate(v, function(){
+						$('#keys').html(this.tpl);
+					});
+					$(inputPassword).val(v.getFakeKey(options.fakePass));
+				}catch(error){ 
+					$('#virtual-key-board').hide(); 
+					$('#keys').empty();
+					if( typeof options.end == 'function'){
+						options.end.call({pass:v.getPass()});
+					}
+				}
 			});
 	};
 }(window.jQuery);
