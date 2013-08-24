@@ -136,7 +136,7 @@
 					$('#virtual-key-board').hide(); 
 					$('#keys').empty();
 					if( typeof options.end == 'function'){
-						options.end.call({pass:v.getPass()});
+						options.end.call({obfuscatedPass:v.getPass()});
 					}
 				}
 			});
