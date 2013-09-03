@@ -81,7 +81,7 @@ final class VirtualKeyBoard{
 			
 			$this->compare( array(1, 2), array(0=>'1,2') );
 			
-			print_r( "SS" );
+			#print_r( "SS" );
 			exit;
 			
 		}
